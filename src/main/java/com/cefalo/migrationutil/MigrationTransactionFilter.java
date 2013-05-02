@@ -45,6 +45,10 @@ public class MigrationTransactionFilter implements TransactionFilter {
                 List<PropertyDescriptor> propertyDescriptors = summary.getDescriptor().getPropertyDescriptors();
 
                 for(PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+                    if (summary.getProperty(propertyDescriptor) != null && !"".equals(summary.getProperty(propertyDescriptor).toString().trim())) {
+                        logger.debug("Summary field already has a value. Skiping...");
+                        continue;
+                    }
                     String fieldName = propertyDescriptor.getName();
                     FieldValue field = null;
                     try{
@@ -53,11 +57,9 @@ public class MigrationTransactionFilter implements TransactionFilter {
                         logger.debug("field '" + fieldName +"' does not exist");
                     }
                     if (field != null) {
-                        if (summary.getProperty(propertyDescriptor) == null || summary.getProperty(propertyDescriptor).toString().trim().equals("")) {
-                            Object fieldValue = field.getValue();
-                            logger.debug("setting summary field " + fieldName + " value = " + fieldValue);
-                            summary.setProperty(propertyDescriptor, fieldValue);
-                        }
+                        Object fieldValue = field.getValue();
+                        logger.debug("setting summary field " + fieldName + " value = " + fieldValue);
+                        summary.setProperty(propertyDescriptor, fieldValue);
                     }
                 }
                 newSummaryList.add(summary);
